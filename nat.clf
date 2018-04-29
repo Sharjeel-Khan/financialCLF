@@ -1,0 +1,100 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%% Natural Numbers %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Adds two natural numbers %%
+sum : exp nat -> exp nat -> exp nat -> type.
+#mode sum + + -.
+sum_z : sum z N N.
+sum_s : sum (s N1) N2 (s N3) <- sum N1 N2 N3.
+
+%% Multiplies two natural numbers %%
+product : exp nat -> exp nat -> exp nat -> type.
+#mode product + + -.
+product_z : product z N z.
+product_s : product (s N1) N2 N3 <- product N1 N2 N3' <- sum N2 N3' N3.
+
+%% Gives the max of the two natural numbers %%
+max : exp nat -> exp nat -> exp nat -> type.
+#mode max + + -.
+max_z1 : max z N N.
+max_z2 : max N z N.
+max_infinity1 : max infinity _ infinity.
+max_infinity2 : max _ infinity infinity.
+max_s : max (s N1) (s N2) (s N3) <- max N1 N2 N3.
+
+%% Gives the min of the two natural numbers %%
+min : exp nat -> exp nat -> exp nat -> type.
+#mode min + + -.
+min_z1 : min N z z.
+min_z2 : min z N z.
+min_infinity1 : min infinity N N.
+min_infinity2 : min N infinity N.
+min_s : min (s N1) (s N2) (s N3) <- min N1 N2 N3.
+
+%% Checks if the two natural numbers are equal %%
+nat-equal : exp nat -> exp nat -> type.
+#mode nat-equal + +.
+nat-equal_nat : nat-equal N N.
+
+%% Checks if the two natural numbers are not equal %%
+nat-neq : exp nat -> exp nat -> type.
+#mode nat-neq + +.
+nat-neq_zs : nat-neq z (s N1).
+nat-neq_sz : nat-neq (s N1) z.
+nat-neq_infinityz : nat-neq (infinity) z.
+nat-neq_zinfinityL : nat-neq z (infinity).
+nat-neq_infinitys : nat-neq (infinity) (s _).
+nat-neq_sinfinity : nat-neq (s _) (infinity).
+nat-neq_s : nat-neq (s M) (s N) <- nat-neq M N.
+
+%% Checks if the first natural number is less than the second one %%
+nat-less : exp nat -> exp nat -> type.
+#mode nat-less + +.
+nat-less/infinity : nat-less z (infinity).
+nat-less/infinity2 : nat-less (s _) (infinity).
+nat-less/z : nat-less z (s _).
+nat-less/s : nat-less (s M) (s N)
+             <- nat-less M N.
+
+%% Checks if the first natural number is less than and equal to the second one %%
+nat-lesseq : exp nat -> exp nat -> type.
+#mode nat-lesseq + +.
+nat-lesseq/z : nat-lesseq z _.
+nat-lesseq/infinity : nat-lesseq _ (infinity).
+nat-lesseq/s : nat-lesseq (s M) (s N)
+               <- nat-lesseq M N.
+
+%% Checks if the first natural number is greater than the second one %%
+nat-great : exp nat -> exp nat -> type.
+#mode nat-great + +.
+nat-great/z : nat-great (s _) z.
+nat-great/infinity : nat-great (infinity) z.
+nat-great/infinity2 : nat-great (infinity) (s _).
+nat-great/s : nat-great (s M) (s N)
+              <- nat-great M N.
+
+%% Checks if the first natural number is greater than and equal to the second one %%
+nat-greateq : exp nat -> exp nat -> type.
+#mode nat-greateq + +.
+nat-greateq/z : nat-greateq _ z.
+nat-greateq/infinity : nat-greateq (infinity) _.
+nat-greateq/s : nat-greateq (s M) (s N)
+                <- nat-greateq M N.
+
+%% Subtracts two natural numbers %%
+nat-minus : exp nat -> exp nat -> exp nat -> type.
+#mode nat-minus + + -.
+nat-minus/z : nat-minus M z M.
+nat-minus/s : nat-minus (s M) (s N) N'
+              <- nat-minus M N N'.
+
+%% Divides two natural numbers and provides the remainder%%
+nat-divmod : exp nat -> exp nat -> exp nat -> exp nat -> type.
+#mode nat-divmod + + - -.
+nat-divmod/less  : nat-divmod M N z M
+                   <- nat-less M N.
+nat-divmod/gtreq : nat-divmod M N (s Q) R
+                   <- nat-lesseq N M
+                   <- nat-minus M N M'
+                   <- nat-divmod M' N Q R.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

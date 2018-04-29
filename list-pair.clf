@@ -1,0 +1,27 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%% Pair Lists %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Append one element from the right %%
+extendP : listP -> exp nat -> exp nat -> exp time -> listP -> type.
+#mode extendP + + + + -.
+extendP/nilP : extendP nilP N1 N2 T (consP N1 N2 T nilP).
+extendP/consP : extendP S N1 N2 T S' -> extendP (consP N1' N2' T' S) N1 N2 T (consP N1' N2' T' S').
+
+%% Checks if the element is in the list by comparing the first element of the pair %%
+inListF : listP -> exp nat -> type.
+#mode inListF + +.
+inListF/yes : inListF (consP N1 N2 T S1) N1.
+inListF/no : inListF S N1 -> inListF (consP N1' N2' T' S) (N1).
+
+%% Checks if the element is not in the list by comparing the first element of the pair %%
+notInListF : listP -> exp nat -> type.
+#mode notInListF + +.
+notInListF/nilP : notInListF nilP N1.
+notInListF/consP : notInListF S N1 -> nat-neq N1 N1' -> notInListF (consP N1' N2' T' S) N1.
+
+%% Removes an element from the list by comparing the first element of the pair %%
+removeF : listP -> exp nat -> listP -> type.
+#mode removeF + + -.
+removeF/end : removeF (nilP) (N) (nilP).
+removeF/eq : removeF S N1 S' -> removeF (consP N1 N2' T' S) N1 S'.
+removeF/neq : removeF S N S' -> nat-neq N N1' -> removeF (consP N1' N2' T' S) N (consP N1' N2' T' S').
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

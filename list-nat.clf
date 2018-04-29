@@ -1,0 +1,55 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%% Natural Number Lists %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Append one element from the right %%
+extend : listN -> exp nat -> exp time -> listN -> type.
+#mode extend + + + -.
+extend/nilN : extend nilN N T (consT N T nilN).
+extend/consT : extend S N T S' -> extend (consT N1 T1 S) N T (consT N1 T1 S').
+
+%% In the list %%
+inList : listN -> exp nat -> type.
+#mode inList + +.
+inList/yes : inList (consN T' S1) T'.
+inList/no : inList S T' -> inList (consN T1 S) (T').
+
+%% Not in list %%
+notInList : listN -> exp nat -> type.
+#mode notInList + +.
+notInList/nilN : notInList nilN T'.
+notInList/consN : notInList S T -> nat-neq T T' -> notInList (consN T' S) T.
+
+%% Insert into the list %%
+insert : listN -> exp nat -> listN -> type.
+#mode insert + + -.
+insert/yes : insert (nilN) (T) (consN T nilN).
+insert/less : nat-less T T' -> insert (consN T' S) T (consN T (consN T' S)).
+insert/great : insert S T S' -> nat-great T T' -> insert (consN T' S) T (consN T' S').
+insert/equal : insert (consN T S) T (consN T S).
+
+%% Remove from list %%
+remove : listN -> exp nat -> listN -> type.
+#mode remove + + -.
+remove/end : remove (nilN) (T) (nilN).
+remove/eq : remove S T S' -> remove (consN T S) T S'.
+remove/neq : remove S T S' -> nat-neq T T' -> remove (consN T' S) T (consN T' S').
+
+%% Remove from list %%
+removeT : listN -> exp nat -> listN -> type.
+#mode removeT + + -.
+removeT/end : removeT (nilN) (T) (nilN).
+removeT/eq : removeT S N S' -> removeT (consT N T S) N S'.
+removeT/neq : removeT S N S' -> nat-neq N N' -> removeT (consT N' T S) N (consT N' T S').
+
+%% Max in list %%
+maxP : listN -> exp nat -> type.
+#mode maxP + -.
+maxP/nilN : maxP nilN z.
+maxP/consN : max T' T T'' -> maxP L T -> maxP (consN T' L) (T'').
+
+%% Min in list %%
+minP : listN -> exp nat -> type.
+#mode minP + -.
+minP/nilN : minP nilN (infinity).
+minP/consN : min T' T T'' -> minP L T -> minP (consN T' L) (T'').
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

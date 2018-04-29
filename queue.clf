@@ -1,0 +1,9 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%% Double-ended queue of orders %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Enqueue the orders from the right %%
+enq : queue -> exp ord -> queue -> type.
+#mode enq + + -.
+enq/empty : enq empty (O) (front O empty).
+enq/front : enq Q O Q' -> enq (front O' Q) O (front O' Q').
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

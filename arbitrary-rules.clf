@@ -1,0 +1,368 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%% Defined Types %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+begin : type.
+#mode begin.
+
+order : ordertype -> action -> exp nat -> exp nat -> exp nat -> type.
+#mode order - - - - -.
+
+priceQ : action -> exp nat -> listP -> type.
+#mode priceQ - - -.
+
+activePrices : action -> listN -> type.
+#mode activePrices - -.
+
+orderQueue : queue -> type.
+#mode orderQueue -.
+
+store : action -> listN -> exp nat -> type.
+#mode store + + +.
+store/sell : store sell L P <- maxP L X <- nat-great P X.
+store/buy : store buy L P <- minP L Y <- nat-less P Y.
+
+exchange : action -> listN -> exp nat -> exp nat -> type.
+#mode exchange + + + -.
+exchange/sell : exchange sell L P X <- maxP L X <- nat-lesseq P X.
+exchange/buy : exchange buy L P Y <- minP L Y <- nat-greateq P Y.
+
+mktExchange : action -> listN -> exp nat -> type.
+#mode mktExchange + + -.
+mktExchange/sell : mktExchange sell L X <- maxP L X.
+mktExchange/buy : mktExchange buy L Y <- minP L Y.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Begin %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+begin/initial : begin
+                  -o {activePrices buy nilN *
+                      activePrices sell nilN *
+                      orderQueue empty *
+                      clock z z}.
+
+clock/changeDay : clock D hundred
+                    -o {clock (s D) z}.
+
+%%%%%%%%%%% Convert order facts to constructors %%%%%%%%%%%%%%%%%
+
+convertOrder : order O A P ID N *
+               orderQueue Q *
+               clock D U *
+               enq Q (ordConsN O A P ID N (timestamp D U)) Q' *
+               nat-less U hundred
+                -o {orderQueue Q' *
+                    clock D (s U)}.
+
+%%%%%%%%%%%%%%%%%%%%%%% Limit Orders %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Adding an order for a particular price first time into the market %%
+limit/empty : orderQueue (front (ordConsN limit A P ID N T) Q) *
+                   dual A A' *
+                   activePrices A BP *
+                   activePrices A' SP *
+                   store A SP P *
+                   notInList BP P *
+                   insert BP P BP' *
+                   clock D U *
+                   nat-less U hundred
+                    -o {orderQueue Q *
+                        activePrices A BP' *
+                        activePrices A' SP *
+                        priceQ A P (consP ID N T nilP) *
+                        clock D (s U)}.
+
+%% Adding an order for a particular price into the market generally %%
+limit/queue : orderQueue (front (ordConsN limit A P ID N T) Q1) *
+              dual A A' *
+              activePrices A' SP *
+              store A SP P *
+              priceQ A P Q *
+              extendP Q ID N T Q' *
+              clock D U *
+              nat-less U hundred
+                -o {priceQ A P Q' *
+                    activePrices A' SP *
+                    orderQueue Q1 *
+                    clock D (s U)}.
+
+%% Filling a limit order such that the quantity is greater than the quantity in the order in %%
+%% the market such that one order left in the price queue %%
+limit/1 : orderQueue (front (ordConsN limit A P ID N T) Q) *
+                   dual A A' *
+                   activePrices A' SP *
+                   exchange A SP P Y *
+                   priceQ A' Y (consP ID' N' T' nilP) *
+                   nat-great N N' *
+                   nat-minus N N' N'' *
+                   remove SP Y SP'
+                     -o {orderQueue (front (ordConsN limit A P ID N'' T) Q) *
+                         activePrices A' SP'}.
+
+%% Filling a limit order such that the quantity is greater than the quantity in the order in %%
+%% the market such that more than one order left in the price queue %%
+limit/2 : orderQueue (front (ordConsN limit A P ID N T) Q) *
+                   dual A A' *
+                   activePrices A' SP *
+                   exchange A SP P Y *
+                   priceQ A' Y (consP ID' N' T' (consP ID1 N1 T1 L)) *
+                   nat-great N N' *
+                   nat-minus N N' N''
+                    -o {priceQ A' Y (consP ID1 N1 T1 L) *
+                        orderQueue (front (ordConsN limit A P ID N'' T) Q) *
+                        activePrices A' SP}.
+
+%% Filling a limit order such that the quantity is equal to the quantity in the order in %%
+%% the market such that more than one order left in the price queue %%
+limit/3 : orderQueue (front (ordConsN limit A P ID N T) Q) *
+                   dual A A' *
+                   activePrices A' SP *
+                   exchange A SP P Y *
+                   priceQ A' Y (consP ID' N T' (consP ID1 N1 T1 L)) *
+                   clock D U *
+                   nat-less U hundred
+                    -o {priceQ A' Y (consP ID1 N1 T1 L) *
+                        activePrices A' SP *
+                        orderQueue Q *
+                        clock D (s U)}.
+
+%% Filling a limit order such that the quantity is equal to the quantity in the order in %%
+%% the market such that one order left in the price queue %%
+limit/4 : orderQueue (front (ordConsN limit A P ID N T) Q) *
+                   dual A A' *
+                   activePrices A' SP *
+                   exchange A SP P Y *
+                   priceQ A' Y (consP ID' N T' nilP) *
+                   remove SP Y SP' *
+                   clock D U *
+                   nat-less U hundred
+                    -o {activePrices A' SP' *
+                        orderQueue Q *
+                        clock D (s U)}.
+
+%% Filling a limit order such that the quantity is less than the quantity in the order in %%
+%% the market %%
+limit/5 : orderQueue (front (ordConsN limit A P ID N T) Q) *
+                   dual A A' *
+                   activePrices A' SP *
+                   exchange A SP P Y *
+                   priceQ A' Y (consP ID' N' T' L) *
+                   nat-less N N' *
+                   nat-minus N' N N'' *
+                   clock D U *
+                   nat-less U hundred
+                    -o {priceQ A' Y (consP ID' N'' T' L) *
+                        activePrices A' SP *
+                        orderQueue Q *
+                        clock D (s U)}.
+
+%%%%%%%%%%%%%%%%%%%%%%% Cancel Orders %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Cancelling an order for a particular price such that the identifer does %%
+%% exist in the market but we only have one order left in the list %%
+cancel/inListNil : orderQueue (front (ordConsN cancel A P ID N T) Q) *
+                   priceQ A P (consP ID N T' nilP) *
+                   activePrices A BP *
+                   remove BP P BP' *
+                   clock D U *
+                   nat-less U hundred
+                    -o {activePrices A BP' *
+                        orderQueue Q *
+                        clock D (s U)}.
+
+%% Cancelling an order for a particular price such that the identifer does %%
+%% exist in the market. %%
+cancel/inListCons : orderQueue (front (ordConsN cancel A P ID N T) Q1) *
+                    priceQ A P Q *
+                    inListF Q ID *
+                    removeF Q ID Q' *
+                    clock D U *
+                    nat-less U hundred
+                      -o {priceQ A P Q' *
+                          orderQueue Q1 *
+                          clock D (s U)}.
+
+%% Cancelling an order for a particular price such that the identifer does not %%
+%% exist in the market. %%
+cancel/notInListQueue : orderQueue (front (ordConsN cancel A P ID N T) Q1) *
+                        priceQ A P Q *
+                        notInListF Q ID *
+                        clock D U *
+                        nat-less U hundred
+                          -o {priceQ A P Q *
+                              orderQueue Q1 *
+                              clock D (s U)}.
+
+%% Cancelling an order for a particular price such that the price does not %%
+%% exist in the market. %%
+cancel/notInListActive : orderQueue (front (ordConsN cancel A P ID N T) Q1) *
+                         activePrices A BP *
+                         notInList BP P *
+                         clock D U *
+                         nat-less U hundred
+                          -o {activePrices A BP *
+                              orderQueue Q1 *
+                              clock D (s U)}.
+
+%%%%%%%%%%%%%%%%%%%%%%% Market Orders %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Filling a market order such that there are no more orders in the market %%
+market/empty : orderQueue (front (ordConsN market A P ID N T) Q) *
+               dual A A' *
+               activePrices A' nilN *
+               clock D U *
+               nat-less U hundred
+                -o {orderQueue Q *
+                    activePrices A' nilN *
+                    clock D (s U)}.
+
+%% Filling a market order such that the quantity is greater than the quantity in the order in %%
+%% the market such that one order left in the price queue %%
+market/1 : orderQueue (front (ordConsN market A P ID N T) Q) *
+           dual A A' *
+           activePrices A' SP *
+           mktExchange A SP Y *
+           priceQ A' Y (consP ID' N' T' nilP) *
+           nat-great N N' *
+           nat-minus N N' N'' *
+           remove SP Y SP'
+            -o {orderQueue (front (ordConsN market A P ID N'' T) Q) *
+                activePrices A' SP'}.
+
+%% Filling a market order such that the quantity is greater than the quantity in the order in %%
+%% the market such that more than one order left in the price queue %%
+market/2 : orderQueue (front (ordConsN market A P ID N T) Q) *
+           dual A A' *
+           activePrices A' SP *
+           mktExchange A SP Y *
+           priceQ A' Y (consP ID' N' T' (consP ID1 N1 T1 L)) *
+           nat-great N N' *
+           nat-minus N N' N''
+            -o {priceQ A' Y (consP ID1 N1 T1 L) *
+                orderQueue (front (ordConsN market A P ID N'' T) Q) *
+                activePrices A' SP}.
+
+%% Filling a market order such that the quantity is equal to the quantity in the order in %%
+%% the market such that more than one order left in the price queue %%
+market/3 : orderQueue (front (ordConsN market A P ID N T) Q) *
+           dual A A' *
+           activePrices A' SP *
+           mktExchange A SP Y *
+           priceQ A' Y (consP ID' N T' (consP ID1 N1 T1 L)) *
+           clock D U *
+           nat-less U hundred
+            -o {priceQ A' Y (consP ID1 N1 T1 L) *
+                activePrices A' SP *
+                orderQueue Q *
+                clock D (s U)}.
+
+%% Filling a market order such that the quantity is equal to the quantity in the order in %%
+%% the market such that one order left in the price queue %%
+market/4 : orderQueue (front (ordConsN market A P ID N T) Q) *
+           dual A A' *
+           activePrices A' SP *
+           mktExchange A SP Y *
+           priceQ A' Y (consP ID' N T' nilP) *
+           remove SP Y SP' *
+           clock D U *
+           nat-less U hundred
+            -o {activePrices A' SP' *
+                orderQueue Q *
+                clock D (s U)}.
+
+%% Filling a market order such that the quantity is less than the quantity in the order in %%
+%% the market %%
+market/5 : orderQueue (front (ordConsN market A P ID N T) Q) *
+           dual A A' *
+           activePrices A' SP *
+           mktExchange A SP Y *
+           priceQ A' Y (consP ID' N' T' L) *
+           nat-less N N' *
+           nat-minus N' N N'' *
+           clock D U *
+           nat-less U hundred
+            -o {priceQ A' Y (consP ID' N'' T' L) *
+                activePrices A' SP *
+                orderQueue Q *
+                clock D (s U)}.
+
+%%%%%%%%%%%%%%%%%%%%%%% IOC Orders %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Filling an IOC order such that the quantity is greater than the quantity in the order in %%
+%% the market such that one order left in the price queue %%
+IOC/1 : orderQueue (front (ordConsN ioc A P ID N T) Q) *
+        dual A A' *
+        activePrices A' SP *
+        exchange A SP P Y *
+        priceQ A' Y (consP ID' N' T' nilP) *
+        nat-great N N' *
+        nat-minus N N' N'' *
+        remove SP Y SP'
+          -o {orderQueue (front (ordConsN ioc A P ID N'' T) Q) *
+              activePrices A' SP'}.
+
+%% Filling an IOC order such that the quantity is greater than the quantity in the order in %%
+%% the market such that more than one order left in the price queue %%
+IOC/2 : orderQueue (front (ordConsN ioc A P ID N T) Q) *
+        dual A A' *
+        activePrices A' SP *
+        exchange A SP P Y *
+        priceQ A' Y (consP ID' N' T' (consP ID1 N1 T1 L)) *
+        nat-great N N' *
+        nat-minus N N' N''
+          -o {priceQ A' Y (consP ID1 N1 T1 L) *
+              orderQueue (front (ordConsN ioc A P ID N'' T) Q) *
+              activePrices A' SP}.
+
+%% Filling an IOC order such that the quantity is equal to the quantity in the order in %%
+%% the market such that more than one order left in the price queue %%
+IOC/3 : orderQueue (front (ordConsN ioc A P ID N T) Q) *
+        dual A A' *
+        activePrices A' SP *
+        exchange A SP P Y *
+        priceQ A' Y (consP ID' N T' (consP ID1 N1 T1 L)) *
+        clock D U *
+        nat-less U hundred
+          -o {priceQ A' Y (consP ID1 N1 T1 L) *
+              activePrices A' SP *
+              orderQueue Q *
+              clock D (s U)}.
+
+%% Filling an IOC order such that the quantity is equal to the quantity in the order in %%
+%% the market such that one order left in the price queue %%
+IOC/4 : orderQueue (front (ordConsN ioc A P ID N T) Q) *
+        dual A A' *
+        activePrices A' SP *
+        exchange A SP P Y *
+        priceQ A' Y (consP ID' N T' nilP) *
+        remove SP Y SP' *
+        clock D U *
+        nat-less U hundred
+         -o {activePrices A' SP' *
+             orderQueue Q *
+             clock D (s U)}.
+
+%% Filling an IOC order such that the quantity is less than the quantity in the order in %%
+%% the market %%
+IOC/5 : orderQueue (front (ordConsN ioc A P ID N T) Q) *
+        dual A A' *
+        activePrices A' SP *
+        exchange A SP P Y *
+        priceQ A' Y (consP ID' N' T' L) *
+        nat-less N N' *
+        nat-minus N' N N'' *
+        clock D U *
+        nat-less U hundred
+          -o {priceQ A' Y (consP ID' N'' T' L) *
+              activePrices A' SP *
+              orderQueue Q *
+              clock D (s U)}.
+
+%% Cancelling the order as we cannot fill it with the orders in the market %%
+IOC/6 : orderQueue (front (ordConsN ioc A P ID N T) Q) *
+        dual A A' *
+        activePrices A' SP *
+        store A SP P *
+        clock D U *
+        nat-less U hundred
+          -o {activePrices A' SP *
+              orderQueue Q *
+              clock D (s U)}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

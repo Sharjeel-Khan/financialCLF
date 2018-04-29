@@ -1,0 +1,64 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%% Defined Types %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% General types %%
+tp : type.
+#mode tp.
+exp : tp -> type.
+#mode exp +.
+
+%% Action %%
+action : type.
+#mode action.
+buy : action.
+sell : action.
+
+%% Change between actions %%
+dual : action -> action -> type.
+#mode dual + -.
+dual/buy : dual buy sell.
+dual/sell : dual sell buy.
+
+%% Natural Numbers %%
+nat : tp.
+infinity : exp nat.
+z : exp nat.
+s : exp nat -> exp nat.
+hundred : exp nat = (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s z)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))).
+
+%% Time %%
+time : tp.
+timestamp : exp nat -> exp nat -> exp time.
+clock : exp nat -> exp nat -> type.
+#mode clock - -.
+
+%% List of Natural Numbers %%
+listN : type.
+#mode listN.
+nilN : listN.
+consN : exp nat -> listN -> listN.
+consT : exp nat -> exp time -> listN -> listN.
+
+%% List of Pairs %%
+listP : type.
+#mode listP.
+nilP : listP.
+consP : exp nat -> exp nat -> exp time -> listP -> listP.
+
+%% Types of orders %%
+ordertype : type.
+#mode ordertype.
+limit : ordertype.
+cancel : ordertype.
+market : ordertype.
+ioc : ordertype.
+
+ord : tp.
+ordConsN : ordertype -> action -> exp nat -> exp nat -> exp nat -> exp time -> exp ord.
+
+%% Order Queue %%
+queue : type.
+#mode queue.
+empty : queue.
+front : exp ord -> queue -> queue.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
