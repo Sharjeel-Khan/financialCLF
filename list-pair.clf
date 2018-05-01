@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%% Pair Lists %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Append one element from the right %%
-extendP : listP -> exp nat -> exp nat -> exp time -> listP -> type.
+extendP : listP -> exp nat -> exp nat -> exp timetp -> listP -> type.
 #mode extendP + + + + -.
 extendP/nilP : extendP nilP N1 N2 T (consP N1 N2 T nilP).
 extendP/consP : extendP S N1 N2 T S' -> extendP (consP N1' N2' T' S) N1 N2 T (consP N1' N2' T' S').

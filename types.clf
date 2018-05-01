@@ -26,23 +26,23 @@ s : exp nat -> exp nat.
 hundred : exp nat = (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s z)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))).
 
 %% Time %%
-time : tp.
-timestamp : exp nat -> exp nat -> exp time.
-clock : exp nat -> exp nat -> type.
-#mode clock - -.
+timetp : tp.
+timestamp : exp nat -> exp timetp.
+time : exp nat -> type.
+#mode time -.
 
 %% List of Natural Numbers %%
 listN : type.
 #mode listN.
 nilN : listN.
 consN : exp nat -> listN -> listN.
-consT : exp nat -> exp time -> listN -> listN.
+consT : exp nat -> exp timetp -> listN -> listN.
 
 %% List of Pairs %%
 listP : type.
 #mode listP.
 nilP : listP.
-consP : exp nat -> exp nat -> exp time -> listP -> listP.
+consP : exp nat -> exp nat -> exp timetp -> listP -> listP.
 
 %% Types of orders %%
 ordertype : type.
@@ -53,7 +53,7 @@ market : ordertype.
 ioc : ordertype.
 
 ord : tp.
-ordConsN : ordertype -> action -> exp nat -> exp nat -> exp nat -> exp time -> exp ord.
+ordConsN : ordertype -> action -> exp nat -> exp nat -> exp nat -> exp timetp -> exp ord.
 
 %% Order Queue %%
 queue : type.

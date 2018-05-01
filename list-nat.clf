@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%% Natural Number Lists %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Append one element from the right %%
-extend : listN -> exp nat -> exp time -> listN -> type.
+extend : listN -> exp nat -> exp timetp -> listN -> type.
 #mode extend + + + -.
 extend/nilN : extend nilN N T (consT N T nilN).
 extend/consT : extend S N T S' -> extend (consT N1 T1 S) N T (consT N1 T1 S').

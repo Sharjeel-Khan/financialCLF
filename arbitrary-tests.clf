@@ -3,7 +3,7 @@
 #query * 1 * 1 begin
                 -o {order limit (buy) (s (s (s z))) (s (s z)) (s z)
                 -o {order limit (sell) (s (s (s z))) (s (s z)) (s z)
-                -o {activePrices buy nilN * activePrices sell nilN * orderQueue empty * clock D U}}}.
+                -o {activePrices buy nilN * activePrices sell nilN * orderQueue empty * time U}}}.
 
 #query * 1 * 1 begin
                 -o {order limit (buy) (s (s (s z))) (s (s z)) (s (s z))
@@ -11,7 +11,7 @@
                 -o {activePrices buy (consN (s (s (s z))) nilN) *
                     activePrices sell nilN *
                     priceQ buy (s (s (s z))) (consP (s (s z)) (s z) T nilP) *
-                    orderQueue empty * clock D U}}}.
+                    orderQueue empty * time U}}}.
 
 #trace * begin * order limit (buy) (s (s (s z))) (s (s z)) (s z) * order limit (sell) (s (s (s z))) (s (s z)) (s z).
 
@@ -21,7 +21,7 @@
                 -o {activePrices buy nilN *
                     activePrices sell (consN (s (s (s z))) nilN) *
                     priceQ sell (s (s (s z))) (consP (s (s z)) (s z) T nilP) *
-                    orderQueue empty * clock D U}}}.
+                    orderQueue empty * time U}}}.
 
 #query * 1 * 1 begin
                 -o {order limit (sell) (s (s (s (s (s (s z)))))) (z) (s z)
@@ -29,50 +29,50 @@
                 -o {order limit (sell) (s (s (s (s (s (s (s (s z)))))))) (s (s z)) (s (s (s z)))
                 -o {order limit (buy) (s (s (s (s (s (s (s (s (s (s z)))))))))) (s (s (s z))) (s (s (s (s (s (s (s (s (s (s z))))))))))
                 -o {orderQueue empty * activePrices sell nilN * activePrices buy (consN (s (s (s (s (s (s (s (s (s (s z)))))))))) nilN) *
-                    priceQ buy (s (s (s (s (s (s (s (s (s (s z)))))))))) (consP (s (s (s z))) (s (s (s (s z)))) T nilP) * clock D U}}}}}.
+                    priceQ buy (s (s (s (s (s (s (s (s (s (s z)))))))))) (consP (s (s (s z))) (s (s (s (s z)))) T nilP) * time U}}}}}.
 
 #query * 1 * 10 begin
                 -o {order limit (sell) (s z) (z) (s (s (s (s (s (s z))))))
                 -o {order limit (sell) (s (s z)) (s z) (s (s (s (s (s (s z))))))
                 -o {order market (buy) (s (s (s (s (s (s (s z))))))) (s (s z)) (s (s z))
                 -o {orderQueue empty * activePrices sell (consN (s z) (consN (s (s z)) nilN)) * activePrices buy nilN
-                    * priceQ sell (s z) (consP (z) (s (s (s (s z)))) T nilP) * priceQ sell (s (s z)) (consP (s z) (s (s (s (s (s (s z)))))) T' nilP) * clock D U}}}}.
+                    * priceQ sell (s z) (consP (z) (s (s (s (s z)))) T nilP) * priceQ sell (s (s z)) (consP (s z) (s (s (s (s (s (s z)))))) T' nilP) * time U}}}}.
 
 #query * 1 * 10 begin
                 -o {order limit (sell) (s z) (z) (s z)
                 -o {order limit (sell) (s (s z)) (s z) (s (s (s (s (s (s z))))))
                 -o {order market (buy) (s (s (s (s (s (s (s z))))))) (s (s z)) (s (s z))
                 -o {orderQueue empty * activePrices sell (consN (s (s z)) nilN) * activePrices buy nilN
-                    * priceQ sell (s (s z)) (consP (s z) (s (s (s (s (s z))))) T nilP) * clock D U}}}}.
+                    * priceQ sell (s (s z)) (consP (s z) (s (s (s (s (s z))))) T nilP) * time U}}}}.
 
 #query * 1 * 10 begin
                 -o {order limit (sell) (s z) (z) (s z)
                 -o {order limit (sell) (s (s z)) (s z) (s (s (s (s (s (s z))))))
                 -o {order market (buy) (s (s (s (s (s (s (s z))))))) (s (s z)) (s (s (s (s (s (s (s z)))))))
-                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * clock D U}}}}.
+                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * time U}}}}.
 
 #query * 1 * 10 begin
                 -o {order limit (sell) (s z) (z) (s z)
                 -o {order limit (sell) (s (s z)) (s z) (s (s (s (s (s (s z))))))
                 -o {order market (buy) (s (s (s (s (s (s (s z))))))) (s (s z)) (s (s (s (s (s (s (s (s z))))))))
-                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * clock D U}}}}.
+                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * time U}}}}.
 
 #query * 1 * 10 begin
                 -o {order limit (buy) (s z) (z) (s z)
                 -o {order limit (buy) (s (s z)) (s z) (s (s (s (s (s (s z))))))
                 -o {order market (sell) (s (s (s (s (s (s (s z))))))) (s (s z)) (s (s (s (s (s (s (s z)))))))
-                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * clock D U}}}}.
+                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * time U}}}}.
 
 #query * 1 * 10 begin
                 -o {order limit (buy) (s z) (z) (s z)
                 -o {order limit (buy) (s (s z)) (s z) (s (s (s (s (s (s z))))))
                 -o {order market (sell) (s (s (s (s (s (s (s z))))))) (s (s z)) (s (s (s (s (s (s (s (s z))))))))
-                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * clock D U}}}}.
+                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * time U}}}}.
 
 #query * 1 * 10 begin
                 -o {order limit (buy) (s z) (z) (s z)
                 -o {order cancel (buy) (s z) (z) (s z)
-                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * clock D U}}}.
+                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * time U}}}.
 
 #trace * begin * order limit (buy) (s z) (z) (s (s (s (s (s (s z)))))) * order limit (buy) (s (s z)) (s z) (s (s (s (s (s (s z)))))) * order market (sell) (s (s (s (s (s (s (s z))))))) (s (s z)) (s (s z)).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

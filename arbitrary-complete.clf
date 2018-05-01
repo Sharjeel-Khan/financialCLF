@@ -26,23 +26,23 @@ s : exp nat -> exp nat.
 hundred : exp nat = (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s (s z)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))).
 
 %% Time %%
-time : tp.
-timestamp : exp nat -> exp nat -> exp time.
-clock : exp nat -> exp nat -> type.
-#mode clock - -.
+timetp : tp.
+timestamp : exp nat -> exp timetp.
+time : exp nat -> type.
+#mode time -.
 
 %% List of Natural Numbers %%
 listN : type.
 #mode listN.
 nilN : listN.
 consN : exp nat -> listN -> listN.
-consT : exp nat -> exp time -> listN -> listN.
+consT : exp nat -> exp timetp -> listN -> listN.
 
 %% List of Pairs %%
 listP : type.
 #mode listP.
 nilP : listP.
-consP : exp nat -> exp nat -> exp time -> listP -> listP.
+consP : exp nat -> exp nat -> exp timetp -> listP -> listP.
 
 %% Types of orders %%
 ordertype : type.
@@ -53,7 +53,7 @@ market : ordertype.
 ioc : ordertype.
 
 ord : tp.
-ordConsN : ordertype -> action -> exp nat -> exp nat -> exp nat -> exp time -> exp ord.
+ordConsN : ordertype -> action -> exp nat -> exp nat -> exp nat -> exp timetp -> exp ord.
 
 %% Order Queue %%
 queue : type.
@@ -165,7 +165,7 @@ nat-divmod/gtreq : nat-divmod M N (s Q) R
 %%%%%%%%%%%%%%%%%%%%%%%%%% Natural Number Lists %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Append one element from the right %%
-extend : listN -> exp nat -> exp time -> listN -> type.
+extend : listN -> exp nat -> exp timetp -> listN -> type.
 #mode extend + + + -.
 extend/nilN : extend nilN N T (consT N T nilN).
 extend/consT : extend S N T S' -> extend (consT N1 T1 S) N T (consT N1 T1 S').
@@ -219,7 +219,7 @@ minP/consN : min T' T T'' -> minP L T -> minP (consN T' L) (T'').
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%% Pair Lists %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Append one element from the right %%
-extendP : listP -> exp nat -> exp nat -> exp time -> listP -> type.
+extendP : listP -> exp nat -> exp nat -> exp timetp -> listP -> type.
 #mode extendP + + + + -.
 extendP/nilP : extendP nilP N1 N2 T (consP N1 N2 T nilP).
 extendP/consP : extendP S N1 N2 T S' -> extendP (consP N1' N2' T' S) N1 N2 T (consP N1' N2' T' S').
@@ -291,20 +291,17 @@ begin/initial : begin
                   -o {activePrices buy nilN *
                       activePrices sell nilN *
                       orderQueue empty *
-                      clock z z}.
-
-clock/changeDay : clock D hundred
-                    -o {clock (s D) z}.
+                      time z}.
 
 %%%%%%%%%%% Convert order facts to constructors %%%%%%%%%%%%%%%%%
 
 convertOrder : order O A P ID N *
                orderQueue Q *
-               clock D U *
-               enq Q (ordConsN O A P ID N (timestamp D U)) Q' *
+               time U *
+               enq Q (ordConsN O A P ID N (timestamp U)) Q' *
                nat-less U hundred
                 -o {orderQueue Q' *
-                    clock D (s U)}.
+                    time (s U)}.
 
 %%%%%%%%%%%%%%%%%%%%%%% Limit Orders %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -316,13 +313,13 @@ limit/empty : orderQueue (front (ordConsN limit A P ID N T) Q) *
                    store A SP P *
                    notInList BP P *
                    insert BP P BP' *
-                   clock D U *
+                   time U *
                    nat-less U hundred
                     -o {orderQueue Q *
                         activePrices A BP' *
                         activePrices A' SP *
                         priceQ A P (consP ID N T nilP) *
-                        clock D (s U)}.
+                        time (s U)}.
 
 %% Adding an order for a particular price into the market generally %%
 limit/queue : orderQueue (front (ordConsN limit A P ID N T) Q1) *
@@ -331,12 +328,12 @@ limit/queue : orderQueue (front (ordConsN limit A P ID N T) Q1) *
               store A SP P *
               priceQ A P Q *
               extendP Q ID N T Q' *
-              clock D U *
+              time U *
               nat-less U hundred
                 -o {priceQ A P Q' *
                     activePrices A' SP *
                     orderQueue Q1 *
-                    clock D (s U)}.
+                    time (s U)}.
 
 %% Filling a limit order such that the quantity is greater than the quantity in the order in %%
 %% the market such that one order left in the price queue %%
@@ -371,12 +368,12 @@ limit/3 : orderQueue (front (ordConsN limit A P ID N T) Q) *
                    activePrices A' SP *
                    exchange A SP P Y *
                    priceQ A' Y (consP ID' N T' (consP ID1 N1 T1 L)) *
-                   clock D U *
+                   time U *
                    nat-less U hundred
                     -o {priceQ A' Y (consP ID1 N1 T1 L) *
                         activePrices A' SP *
                         orderQueue Q *
-                        clock D (s U)}.
+                        time (s U)}.
 
 %% Filling a limit order such that the quantity is equal to the quantity in the order in %%
 %% the market such that one order left in the price queue %%
@@ -386,11 +383,11 @@ limit/4 : orderQueue (front (ordConsN limit A P ID N T) Q) *
                    exchange A SP P Y *
                    priceQ A' Y (consP ID' N T' nilP) *
                    remove SP Y SP' *
-                   clock D U *
+                   time U *
                    nat-less U hundred
                     -o {activePrices A' SP' *
                         orderQueue Q *
-                        clock D (s U)}.
+                        time (s U)}.
 
 %% Filling a limit order such that the quantity is less than the quantity in the order in %%
 %% the market %%
@@ -401,12 +398,12 @@ limit/5 : orderQueue (front (ordConsN limit A P ID N T) Q) *
                    priceQ A' Y (consP ID' N' T' L) *
                    nat-less N N' *
                    nat-minus N' N N'' *
-                   clock D U *
+                   time U *
                    nat-less U hundred
                     -o {priceQ A' Y (consP ID' N'' T' L) *
                         activePrices A' SP *
                         orderQueue Q *
-                        clock D (s U)}.
+                        time (s U)}.
 
 %%%%%%%%%%%%%%%%%%%%%%% Cancel Orders %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -416,11 +413,11 @@ cancel/inListNil : orderQueue (front (ordConsN cancel A P ID N T) Q) *
                    priceQ A P (consP ID N T' nilP) *
                    activePrices A BP *
                    remove BP P BP' *
-                   clock D U *
+                   time U *
                    nat-less U hundred
                     -o {activePrices A BP' *
                         orderQueue Q *
-                        clock D (s U)}.
+                        time (s U)}.
 
 %% Cancelling an order for a particular price such that the identifer does %%
 %% exist in the market. %%
@@ -428,33 +425,33 @@ cancel/inListCons : orderQueue (front (ordConsN cancel A P ID N T) Q1) *
                     priceQ A P Q *
                     inListF Q ID *
                     removeF Q ID Q' *
-                    clock D U *
+                    time U *
                     nat-less U hundred
                       -o {priceQ A P Q' *
                           orderQueue Q1 *
-                          clock D (s U)}.
+                          time (s U)}.
 
 %% Cancelling an order for a particular price such that the identifer does not %%
 %% exist in the market. %%
 cancel/notInListQueue : orderQueue (front (ordConsN cancel A P ID N T) Q1) *
                         priceQ A P Q *
                         notInListF Q ID *
-                        clock D U *
+                        time U *
                         nat-less U hundred
                           -o {priceQ A P Q *
                               orderQueue Q1 *
-                              clock D (s U)}.
+                              time (s U)}.
 
 %% Cancelling an order for a particular price such that the price does not %%
 %% exist in the market. %%
 cancel/notInListActive : orderQueue (front (ordConsN cancel A P ID N T) Q1) *
                          activePrices A BP *
                          notInList BP P *
-                         clock D U *
+                         time U *
                          nat-less U hundred
                           -o {activePrices A BP *
                               orderQueue Q1 *
-                              clock D (s U)}.
+                              time (s U)}.
 
 %%%%%%%%%%%%%%%%%%%%%%% Market Orders %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -462,11 +459,11 @@ cancel/notInListActive : orderQueue (front (ordConsN cancel A P ID N T) Q1) *
 market/empty : orderQueue (front (ordConsN market A P ID N T) Q) *
                dual A A' *
                activePrices A' nilN *
-               clock D U *
+               time U *
                nat-less U hundred
                 -o {orderQueue Q *
                     activePrices A' nilN *
-                    clock D (s U)}.
+                    time (s U)}.
 
 %% Filling a market order such that the quantity is greater than the quantity in the order in %%
 %% the market such that one order left in the price queue %%
@@ -501,12 +498,12 @@ market/3 : orderQueue (front (ordConsN market A P ID N T) Q) *
            activePrices A' SP *
            mktExchange A SP Y *
            priceQ A' Y (consP ID' N T' (consP ID1 N1 T1 L)) *
-           clock D U *
+           time U *
            nat-less U hundred
             -o {priceQ A' Y (consP ID1 N1 T1 L) *
                 activePrices A' SP *
                 orderQueue Q *
-                clock D (s U)}.
+                time (s U)}.
 
 %% Filling a market order such that the quantity is equal to the quantity in the order in %%
 %% the market such that one order left in the price queue %%
@@ -516,11 +513,11 @@ market/4 : orderQueue (front (ordConsN market A P ID N T) Q) *
            mktExchange A SP Y *
            priceQ A' Y (consP ID' N T' nilP) *
            remove SP Y SP' *
-           clock D U *
+           time U *
            nat-less U hundred
             -o {activePrices A' SP' *
                 orderQueue Q *
-                clock D (s U)}.
+                time (s U)}.
 
 %% Filling a market order such that the quantity is less than the quantity in the order in %%
 %% the market %%
@@ -531,12 +528,12 @@ market/5 : orderQueue (front (ordConsN market A P ID N T) Q) *
            priceQ A' Y (consP ID' N' T' L) *
            nat-less N N' *
            nat-minus N' N N'' *
-           clock D U *
+           time U *
            nat-less U hundred
             -o {priceQ A' Y (consP ID' N'' T' L) *
                 activePrices A' SP *
                 orderQueue Q *
-                clock D (s U)}.
+                time (s U)}.
 
 %%%%%%%%%%%%%%%%%%%%%%% IOC Orders %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -573,12 +570,12 @@ IOC/3 : orderQueue (front (ordConsN ioc A P ID N T) Q) *
         activePrices A' SP *
         exchange A SP P Y *
         priceQ A' Y (consP ID' N T' (consP ID1 N1 T1 L)) *
-        clock D U *
+        time U *
         nat-less U hundred
           -o {priceQ A' Y (consP ID1 N1 T1 L) *
               activePrices A' SP *
               orderQueue Q *
-              clock D (s U)}.
+              time (s U)}.
 
 %% Filling an IOC order such that the quantity is equal to the quantity in the order in %%
 %% the market such that one order left in the price queue %%
@@ -588,11 +585,11 @@ IOC/4 : orderQueue (front (ordConsN ioc A P ID N T) Q) *
         exchange A SP P Y *
         priceQ A' Y (consP ID' N T' nilP) *
         remove SP Y SP' *
-        clock D U *
+        time U *
         nat-less U hundred
          -o {activePrices A' SP' *
              orderQueue Q *
-             clock D (s U)}.
+             time (s U)}.
 
 %% Filling an IOC order such that the quantity is less than the quantity in the order in %%
 %% the market %%
@@ -603,30 +600,30 @@ IOC/5 : orderQueue (front (ordConsN ioc A P ID N T) Q) *
         priceQ A' Y (consP ID' N' T' L) *
         nat-less N N' *
         nat-minus N' N N'' *
-        clock D U *
+        time U *
         nat-less U hundred
           -o {priceQ A' Y (consP ID' N'' T' L) *
               activePrices A' SP *
               orderQueue Q *
-              clock D (s U)}.
+              time (s U)}.
 
 %% Cancelling the order as we cannot fill it with the orders in the market %%
 IOC/6 : orderQueue (front (ordConsN ioc A P ID N T) Q) *
         dual A A' *
         activePrices A' SP *
         store A SP P *
-        clock D U *
+        time U *
         nat-less U hundred
           -o {activePrices A' SP *
               orderQueue Q *
-              clock D (s U)}.
+              time (s U)}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%% Arbitrary Rules Tests %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #query * 1 * 1 begin
                 -o {order limit (buy) (s (s (s z))) (s (s z)) (s z)
                 -o {order limit (sell) (s (s (s z))) (s (s z)) (s z)
-                -o {activePrices buy nilN * activePrices sell nilN * orderQueue empty * clock D U}}}.
+                -o {activePrices buy nilN * activePrices sell nilN * orderQueue empty * time U}}}.
 
 #query * 1 * 1 begin
                 -o {order limit (buy) (s (s (s z))) (s (s z)) (s (s z))
@@ -634,7 +631,7 @@ IOC/6 : orderQueue (front (ordConsN ioc A P ID N T) Q) *
                 -o {activePrices buy (consN (s (s (s z))) nilN) *
                     activePrices sell nilN *
                     priceQ buy (s (s (s z))) (consP (s (s z)) (s z) T nilP) *
-                    orderQueue empty * clock D U}}}.
+                    orderQueue empty * time U}}}.
 
 #trace * begin * order limit (buy) (s (s (s z))) (s (s z)) (s z) * order limit (sell) (s (s (s z))) (s (s z)) (s z).
 
@@ -644,7 +641,7 @@ IOC/6 : orderQueue (front (ordConsN ioc A P ID N T) Q) *
                 -o {activePrices buy nilN *
                     activePrices sell (consN (s (s (s z))) nilN) *
                     priceQ sell (s (s (s z))) (consP (s (s z)) (s z) T nilP) *
-                    orderQueue empty * clock D U}}}.
+                    orderQueue empty * time U}}}.
 
 #query * 1 * 1 begin
                 -o {order limit (sell) (s (s (s (s (s (s z)))))) (z) (s z)
@@ -652,50 +649,50 @@ IOC/6 : orderQueue (front (ordConsN ioc A P ID N T) Q) *
                 -o {order limit (sell) (s (s (s (s (s (s (s (s z)))))))) (s (s z)) (s (s (s z)))
                 -o {order limit (buy) (s (s (s (s (s (s (s (s (s (s z)))))))))) (s (s (s z))) (s (s (s (s (s (s (s (s (s (s z))))))))))
                 -o {orderQueue empty * activePrices sell nilN * activePrices buy (consN (s (s (s (s (s (s (s (s (s (s z)))))))))) nilN) *
-                    priceQ buy (s (s (s (s (s (s (s (s (s (s z)))))))))) (consP (s (s (s z))) (s (s (s (s z)))) T nilP) * clock D U}}}}}.
+                    priceQ buy (s (s (s (s (s (s (s (s (s (s z)))))))))) (consP (s (s (s z))) (s (s (s (s z)))) T nilP) * time U}}}}}.
 
 #query * 1 * 10 begin
                 -o {order limit (sell) (s z) (z) (s (s (s (s (s (s z))))))
                 -o {order limit (sell) (s (s z)) (s z) (s (s (s (s (s (s z))))))
                 -o {order market (buy) (s (s (s (s (s (s (s z))))))) (s (s z)) (s (s z))
                 -o {orderQueue empty * activePrices sell (consN (s z) (consN (s (s z)) nilN)) * activePrices buy nilN
-                    * priceQ sell (s z) (consP (z) (s (s (s (s z)))) T nilP) * priceQ sell (s (s z)) (consP (s z) (s (s (s (s (s (s z)))))) T' nilP) * clock D U}}}}.
+                    * priceQ sell (s z) (consP (z) (s (s (s (s z)))) T nilP) * priceQ sell (s (s z)) (consP (s z) (s (s (s (s (s (s z)))))) T' nilP) * time U}}}}.
 
 #query * 1 * 10 begin
                 -o {order limit (sell) (s z) (z) (s z)
                 -o {order limit (sell) (s (s z)) (s z) (s (s (s (s (s (s z))))))
                 -o {order market (buy) (s (s (s (s (s (s (s z))))))) (s (s z)) (s (s z))
                 -o {orderQueue empty * activePrices sell (consN (s (s z)) nilN) * activePrices buy nilN
-                    * priceQ sell (s (s z)) (consP (s z) (s (s (s (s (s z))))) T nilP) * clock D U}}}}.
+                    * priceQ sell (s (s z)) (consP (s z) (s (s (s (s (s z))))) T nilP) * time U}}}}.
 
 #query * 1 * 10 begin
                 -o {order limit (sell) (s z) (z) (s z)
                 -o {order limit (sell) (s (s z)) (s z) (s (s (s (s (s (s z))))))
                 -o {order market (buy) (s (s (s (s (s (s (s z))))))) (s (s z)) (s (s (s (s (s (s (s z)))))))
-                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * clock D U}}}}.
+                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * time U}}}}.
 
 #query * 1 * 10 begin
                 -o {order limit (sell) (s z) (z) (s z)
                 -o {order limit (sell) (s (s z)) (s z) (s (s (s (s (s (s z))))))
                 -o {order market (buy) (s (s (s (s (s (s (s z))))))) (s (s z)) (s (s (s (s (s (s (s (s z))))))))
-                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * clock D U}}}}.
+                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * time U}}}}.
 
 #query * 1 * 10 begin
                 -o {order limit (buy) (s z) (z) (s z)
                 -o {order limit (buy) (s (s z)) (s z) (s (s (s (s (s (s z))))))
                 -o {order market (sell) (s (s (s (s (s (s (s z))))))) (s (s z)) (s (s (s (s (s (s (s z)))))))
-                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * clock D U}}}}.
+                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * time U}}}}.
 
 #query * 1 * 10 begin
                 -o {order limit (buy) (s z) (z) (s z)
                 -o {order limit (buy) (s (s z)) (s z) (s (s (s (s (s (s z))))))
                 -o {order market (sell) (s (s (s (s (s (s (s z))))))) (s (s z)) (s (s (s (s (s (s (s (s z))))))))
-                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * clock D U}}}}.
+                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * time U}}}}.
 
 #query * 1 * 10 begin
                 -o {order limit (buy) (s z) (z) (s z)
                 -o {order cancel (buy) (s z) (z) (s z)
-                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * clock D U}}}.
+                -o {orderQueue empty * activePrices sell nilN * activePrices buy nilN * time U}}}.
 
 #trace * begin * order limit (buy) (s z) (z) (s (s (s (s (s (s z)))))) * order limit (buy) (s (s z)) (s z) (s (s (s (s (s (s z)))))) * order market (sell) (s (s (s (s (s (s (s z))))))) (s (s z)) (s (s z)).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
